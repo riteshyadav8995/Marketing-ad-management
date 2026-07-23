@@ -15,7 +15,7 @@ export function PublicPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-    fetch(`http://localhost:5000/api/public/pages/${slug}?${params.toString()}`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/public/pages/${slug}?${params.toString()}`)
       .then(res => {
         if (!res.ok) throw new Error('Page not found');
         return res.json();
@@ -71,7 +71,7 @@ export function PublicPage() {
                       const phone = (form.elements.namedItem('phone') as HTMLInputElement).value;
                       
                       try {
-                        await fetch('http://localhost:5000/api/pages/submit-form', {
+                        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/pages/submit-form`, {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({

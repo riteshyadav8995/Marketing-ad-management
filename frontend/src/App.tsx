@@ -14,7 +14,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 
 const queryClient = new QueryClient();
 
-const API_BASE = 'http://localhost:5000/api/dashboard';
+const API_BASE = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/dashboard`;
 
 async function fetchSummary() {
   const res = await fetch(`${API_BASE}/summary`);
@@ -314,7 +314,7 @@ function Login() {
     setLoading(true);
     
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

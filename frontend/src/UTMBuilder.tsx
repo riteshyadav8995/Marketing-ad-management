@@ -59,7 +59,7 @@ export function UTMBuilder() {
   const { data: links, isLoading } = useQuery({
     queryKey: ['utmLinks'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:5000/api/utm-links');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/utm-links`);
       return res.json();
     }
   });
@@ -67,14 +67,14 @@ export function UTMBuilder() {
   const { data: pages } = useQuery({
     queryKey: ['pages'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:5000/api/pages');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/pages`);
       return res.json();
     }
   });
 
   const mutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const res = await fetch('http://localhost:5000/api/utm-links', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/utm-links`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),

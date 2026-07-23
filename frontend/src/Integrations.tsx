@@ -10,7 +10,7 @@ export function Integrations() {
   const { data: connections, isLoading } = useQuery({
     queryKey: ['integrations'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:5000/api/integrations');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/integrations`);
       if (!res.ok) throw new Error('Failed to fetch integrations');
       return res.json();
     }
@@ -18,7 +18,7 @@ export function Integrations() {
 
   const connectMutation = useMutation({
     mutationFn: async (platform: string) => {
-      const res = await fetch('http://localhost:5000/api/integrations/connect', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/integrations/connect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ platform })
@@ -33,7 +33,7 @@ export function Integrations() {
 
   const disconnectMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch('http://localhost:5000/api/integrations/disconnect', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/integrations/disconnect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
@@ -48,7 +48,7 @@ export function Integrations() {
 
   const syncMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch('http://localhost:5000/api/integrations/sync', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/integrations/sync`, {
         method: 'POST'
       });
       if (!res.ok) throw new Error('Failed to sync');

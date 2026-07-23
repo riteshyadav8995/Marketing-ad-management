@@ -19,7 +19,7 @@ export function PagesBuilder() {
   
   const mutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch('http://localhost:5000/api/pages', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/pages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, sections }),
@@ -230,7 +230,7 @@ export function PagesBuilder() {
                                 const phone = (document.getElementById('sim-phone') as HTMLInputElement)?.value;
                                 
                                 try {
-                                  const res = await fetch('http://localhost:5000/api/pages/submit-form', {
+                                  const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/pages/submit-form`, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({

@@ -10,13 +10,13 @@ import { Badge } from '@/components/ui/badge';
 import { Contact2, TrendingUp } from 'lucide-react';
 
 async function fetchLeads() {
-  const res = await fetch('http://localhost:5000/api/leads');
+  const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/leads`);
   if (!res.ok) throw new Error('Failed to fetch leads');
   return res.json();
 }
 
 async function updateLeadStatus({ id, status, revenue }: { id: string; status: string; revenue?: string }) {
-  const res = await fetch(`http://localhost:5000/api/leads/${id}/status`, {
+  const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/leads/${id}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status, revenue }),

@@ -15,7 +15,7 @@ export function Analytics() {
   const { data: attribution, isLoading: loadingAttr } = useQuery({
     queryKey: ['attribution'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:5000/api/attribution/funnel');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/attribution/funnel`);
       return res.json();
     }
   });
@@ -23,7 +23,7 @@ export function Analytics() {
   const { data: pages } = useQuery({
     queryKey: ['pages'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:5000/api/pages');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/pages`);
       return res.json();
     }
   });
@@ -31,14 +31,14 @@ export function Analytics() {
   const { data: experiments, isLoading: loadingExp } = useQuery({
     queryKey: ['experiments'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:5000/api/experiments');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/experiments`);
       return res.json();
     }
   });
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch('http://localhost:5000/api/experiments', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/experiments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
