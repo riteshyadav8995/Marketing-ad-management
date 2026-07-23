@@ -37,9 +37,15 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const org = await prisma.organization.findFirst();
+    if (!org) {
+      res.status(500).json({ error: 'Organization not found' });
+      return;
+    }
+
     const experiment = await prisma.aBExperiment.create({
       data: {
-        organizationId: DEFAULT_ORG_ID,
+        organizationId: org.id,
         name,
         variants: {
           create: variants.map((v: any) => ({
