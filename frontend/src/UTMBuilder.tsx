@@ -121,7 +121,7 @@ export function UTMBuilder() {
                       <SelectTrigger className="bg-surface/50 border-border text-text">
                         <SelectValue placeholder="Select a landing page..." />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-surface border-border text-text z-50">
                         {pages?.map((p: any) => (
                           <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
                         ))}
