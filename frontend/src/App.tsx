@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-quer
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Activity, DollarSign, Users, MousePointerClick, TrendingUp, LayoutDashboard, Link as LinkIcon, AppWindow, BarChart, Sun, Moon, Plug } from 'lucide-react';
+import { Activity, DollarSign, Users, MousePointerClick, TrendingUp, LayoutDashboard, Link as LinkIcon, AppWindow, BarChart, Sun, Moon, Plug, Menu, X } from 'lucide-react';
 import { UTMBuilder } from './UTMBuilder';
 import { PagesBuilder } from './PagesBuilder';
 import { CRM } from './CRM';
@@ -213,6 +213,11 @@ function Dashboard() {
 
 function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, toggleTheme: () => void, isDark: boolean }) {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
   
   return (
     <div className="h-screen flex flex-col bg-background font-sans transition-colors duration-300 overflow-hidden relative">
@@ -222,23 +227,30 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/10 blur-[120px]" />
       </div>
 
-      <header className="h-16 shrink-0 flex items-center justify-between px-6 bg-surface shadow-sm border-b border-border z-50 relative">
-        <div className="flex items-center space-x-6">
+      <header className="h-16 shrink-0 flex items-center justify-between px-4 sm:px-6 bg-surface shadow-sm border-b border-border z-50 relative">
+        <div className="flex items-center space-x-4 sm:space-x-6">
+          <button 
+            className="md:hidden p-2 -ml-2 text-text hover:bg-surface-hover rounded-lg transition-colors"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
+            <Menu size={24} />
+          </button>
+          
           <div className="flex items-center space-x-3 shrink-0">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold shadow-md shadow-primary/30">
               A
             </div>
-            <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-text to-text-muted tracking-tight">Ad Platform</h1>
+            <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-text to-text-muted tracking-tight hidden sm:block">Ad Platform</h1>
           </div>
           <div className="h-5 w-px bg-border hidden sm:block"></div>
           <div className="text-xs font-medium text-text-muted uppercase tracking-wider hidden sm:block">
             {location.pathname.replace('/', '').replace('-', ' ')}
           </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-3 bg-surface hover:bg-surface-hover transition-colors px-3 py-1.5 rounded-full border border-border shadow-sm cursor-pointer">
+        <div className="flex items-center space-x-3 sm:space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-3 bg-surface hover:bg-surface-hover transition-colors px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-full border border-border shadow-sm cursor-pointer">
             <div className="w-6 h-6 rounded-full bg-gradient-to-r from-accent to-orange-400 border border-surface" />
-            <span className="text-xs font-medium text-text">Admin User</span>
+            <span className="text-xs font-medium text-text hidden sm:inline-block">Admin User</span>
           </div>
           <button 
             onClick={() => {
@@ -255,7 +267,26 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
       </header>
 
       <div className="flex-1 flex overflow-hidden z-10 relative">
-        <div className="w-64 sidebar-dark shadow-xl flex flex-col border-r border-slate-800 shrink-0 z-20">
+        {/* Mobile Sidebar Overlay */}
+        {isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
+        <div className={`
+          sidebar-dark shadow-2xl flex flex-col border-r border-slate-800 shrink-0 z-50
+          fixed inset-y-0 left-0 w-64 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full hidden md:flex'}
+        `}>
+          <div className="p-4 flex items-center justify-between md:hidden border-b border-slate-800">
+            <span className="font-bold text-white tracking-tight">Menu</span>
+            <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-400 hover:text-white p-1">
+              <X size={20} />
+            </button>
+          </div>
+          
           <div className="p-4 flex flex-col space-y-4 flex-1 overflow-y-auto scrollbar-thin">
             <nav className="flex flex-col space-y-1">
               {[
@@ -298,7 +329,7 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
           </div>
         </div>
         
-        <main className="flex-1 overflow-auto relative p-6">
+        <main className="flex-1 overflow-auto relative p-4 sm:p-6 w-full">
           {children}
         </main>
       </div>

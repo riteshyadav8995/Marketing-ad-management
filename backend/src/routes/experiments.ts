@@ -55,14 +55,12 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
           }))
         }
       },
-      include: {
-        variants: true
-      }
+      include: { variants: true }
     });
-
-    res.json(experiment);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to create experiment' });
+    res.status(201).json(experiment);
+  } catch (error: any) {
+    console.error('Experiment creation error:', error);
+    res.status(500).json({ error: 'Failed to create experiment', details: error.message || String(error) });
   }
 });
 
