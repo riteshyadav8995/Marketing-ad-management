@@ -138,7 +138,8 @@ router.post('/sync', async (req: Request, res: Response) => {
             date: today,
             spend,
             impressions,
-            clicks
+            clicks,
+            accountId: conn.id
           }
         });
       }

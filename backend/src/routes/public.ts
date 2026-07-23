@@ -41,7 +41,7 @@ router.get('/pages/:slug', async (req: Request, res: Response) => {
 // Splits traffic between variants and redirects to the chosen landing page slug
 router.get('/experiment/:id', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { utm_source, utm_medium, utm_campaign, utm_content } = req.query;
     
     const experiment = await prisma.aBExperiment.findUnique({
@@ -54,11 +54,11 @@ router.get('/experiment/:id', async (req: Request, res: Response) => {
     }
 
     // Weighted random selection
-    const totalWeight = experiment.variants.reduce((sum, v) => sum + v.trafficWeight, 0);
+    const totalWeight = (experiment as any).variants.reduce((sum: number, v: any) => sum + v.trafficWeight, 0);
     let random = Math.floor(Math.random() * totalWeight);
-    let selectedVariant = experiment.variants[0];
+    let selectedVariant = (experiment as any).variants[0];
     
-    for (const variant of experiment.variants) {
+    for (const variant of (experiment as any).variants) {
       if (random < variant.trafficWeight) {
         selectedVariant = variant;
         break;

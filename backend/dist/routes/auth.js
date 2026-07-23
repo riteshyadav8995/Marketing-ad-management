@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const router = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
 router.post('/login', async (req, res) => {
@@ -15,6 +16,11 @@ router.post('/login', async (req, res) => {
             where: { email }
         });
         if (!user) {
+            res.status(401).json({ error: 'Invalid credentials' });
+            return;
+        }
+        const isValidPassword = await bcryptjs_1.default.compare(password, user.passwordHash);
+        if (!isValidPassword) {
             res.status(401).json({ error: 'Invalid credentials' });
             return;
         }

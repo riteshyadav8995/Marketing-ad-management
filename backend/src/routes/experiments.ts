@@ -63,7 +63,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 // Update experiment status
 router.post('/:id/status', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { status } = req.body;
     
     const updateData: any = { status };
