@@ -14,7 +14,11 @@ router.get('/summary', async (req, res) => {
             }
         });
         const totalLeads = await prisma.lead.count();
-        const customers = await prisma.lead.count({ where: { status: 'CONVERTED' } });
+        const uniqueCustomers = await prisma.lead.findMany({
+            distinct: ['email'],
+            select: { email: true }
+        });
+        const customers = uniqueCustomers.length;
         const leadRevenueAgg = await prisma.lead.aggregate({ _sum: { revenue: true } });
         const totalRevenue = leadRevenueAgg._sum.revenue || 0;
         const spend = metrics._sum.spend || 0;
