@@ -215,90 +215,92 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
   const location = useLocation();
   
   return (
-    <div className="h-screen overflow-hidden flex bg-background font-sans transition-colors duration-300">
+    <div className="h-screen flex flex-col bg-background font-sans transition-colors duration-300 overflow-hidden relative">
       {/* Background decoration */}
-      <div className="flex h-screen bg-background bg-grid-pattern font-sans overflow-hidden">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-grid-pattern">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/10 blur-[120px]" />
       </div>
 
-      <div className="w-64 sidebar-dark shadow-xl z-10 flex flex-col m-4 rounded-2xl overflow-hidden border">
-        <div className="p-6 flex flex-col space-y-6 flex-1 overflow-y-auto scrollbar-thin">
-          
-          <nav className="flex flex-col space-y-2">
-            {[
-              { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-              { path: '/utm-builder', icon: LinkIcon, label: 'UTM Builder' },
-              { path: '/pages-builder', icon: AppWindow, label: 'Pages & Forms' },
-              { path: '/crm', icon: Users, label: 'CRM / Leads' },
-              { path: '/analytics', icon: BarChart, label: 'Analytics & Tests' },
-              { path: '/integrations', icon: Plug, label: 'Integrations' }
-            ].map((item) => {
-              const isActive = location.pathname.startsWith(item.path);
-              return (
-                <Link 
-                  key={item.path}
-                  to={item.path} 
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
-                    isActive 
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-md shadow-primary/20' 
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white hover:scale-[1.02]'
-                  }`}
-                >
-                  <item.icon size={18} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-white transition-colors'} />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-        
-        <div className="p-6 border-t border-slate-800 bg-slate-900/50">
-          <button 
-            onClick={toggleTheme}
-            className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl transition-all duration-300 text-slate-300 hover:bg-slate-800 hover:text-white hover:scale-[1.02] group"
-          >
-            <div className="p-1.5 rounded-md bg-slate-800 border border-slate-700 shadow-sm group-hover:border-primary/50 transition-colors">
-              {isDark ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-indigo-400" />}
+      <header className="h-16 shrink-0 flex items-center justify-between px-6 bg-surface shadow-sm border-b border-border z-50 relative">
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-3 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold shadow-md shadow-primary/30">
+              A
             </div>
-            <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+            <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-text to-text-muted tracking-tight">Ad Platform</h1>
+          </div>
+          <div className="h-5 w-px bg-border hidden sm:block"></div>
+          <div className="text-xs font-medium text-text-muted uppercase tracking-wider hidden sm:block">
+            {location.pathname.replace('/', '').replace('-', ' ')}
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 bg-surface hover:bg-surface-hover transition-colors px-3 py-1.5 rounded-full border border-border shadow-sm cursor-pointer">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-r from-accent to-orange-400 border border-surface" />
+            <span className="text-xs font-medium text-text">Admin User</span>
+          </div>
+          <button 
+            onClick={() => {
+              if (window.confirm("Are you sure you want to logout?")) {
+                const event = new CustomEvent('app-logout');
+                window.dispatchEvent(event);
+              }
+            }}
+            className="text-text-muted hover:text-red-500 transition-colors text-xs font-medium"
+          >
+            Logout
           </button>
         </div>
-      </div>
-      
-      <div className="flex-1 overflow-auto z-10 relative">
-        <header className="h-20 flex items-center justify-between px-8 m-4 rounded-2xl bg-surface shadow-md border border-border sticky top-4 z-50">
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-3 shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold shadow-lg shadow-primary/30">
-                A
-              </div>
-              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text to-text-muted tracking-tight">Ad Platform</h1>
-            </div>
-            <div className="h-6 w-px bg-border hidden sm:block"></div>
-            <div className="text-sm font-medium text-text-muted uppercase tracking-wider hidden sm:block">
-              {location.pathname.replace('/', '').replace('-', ' ')}
-            </div>
+      </header>
+
+      <div className="flex-1 flex overflow-hidden z-10 relative">
+        <div className="w-64 sidebar-dark shadow-xl flex flex-col border-r border-slate-800 shrink-0 z-20">
+          <div className="p-4 flex flex-col space-y-4 flex-1 overflow-y-auto scrollbar-thin">
+            <nav className="flex flex-col space-y-1">
+              {[
+                { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+                { path: '/utm-builder', icon: LinkIcon, label: 'UTM Builder' },
+                { path: '/pages-builder', icon: AppWindow, label: 'Pages & Forms' },
+                { path: '/crm', icon: Users, label: 'CRM / Leads' },
+                { path: '/analytics', icon: BarChart, label: 'Analytics & Tests' },
+                { path: '/integrations', icon: Plug, label: 'Integrations' }
+              ].map((item) => {
+                const isActive = location.pathname.startsWith(item.path);
+                return (
+                  <Link 
+                    key={item.path}
+                    to={item.path} 
+                    className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-300 group ${
+                      isActive 
+                        ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-md shadow-primary/20' 
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    <item.icon size={18} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-white transition-colors'} />
+                    <span className="font-medium text-sm">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3 bg-surface hover:bg-surface-hover transition-colors px-4 py-2 rounded-full border border-border shadow-sm cursor-pointer">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-orange-400 border-2 border-surface" />
-              <span className="text-sm font-medium text-text">Admin User</span>
-            </div>
+          
+          <div className="p-4 border-t border-slate-800 bg-slate-900/50">
             <button 
-              onClick={() => {
-                if (window.confirm("Are you sure you want to logout?")) {
-                  const event = new CustomEvent('app-logout');
-                  window.dispatchEvent(event);
-                }
-              }}
-              className="text-text-muted hover:text-red-500 transition-colors text-sm font-medium"
+              onClick={toggleTheme}
+              className="flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg transition-all duration-300 text-slate-300 hover:bg-slate-800 hover:text-white group"
             >
-              Logout
+              <div className="p-1.5 rounded-md bg-slate-800 border border-slate-700 shadow-sm group-hover:border-primary/50 transition-colors">
+                {isDark ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-indigo-400" />}
+              </div>
+              <span className="font-medium text-sm">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
             </button>
           </div>
-        </header>
-        {children}
+        </div>
+        
+        <main className="flex-1 overflow-auto relative p-6">
+          {children}
+        </main>
       </div>
     </div>
   );
