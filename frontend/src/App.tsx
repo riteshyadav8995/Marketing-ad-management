@@ -217,7 +217,7 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
   return (
     <div className="h-screen flex flex-col bg-background font-sans transition-colors duration-300 overflow-hidden relative">
       {/* Background decoration */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-grid-pattern">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/10 blur-[120px]" />
       </div>
