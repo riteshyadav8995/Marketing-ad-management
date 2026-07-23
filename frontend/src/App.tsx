@@ -273,7 +273,7 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
       </div>
       
       <div className="flex-1 overflow-auto z-10 relative">
-        <header className="h-20 flex items-center justify-between px-8 m-4 rounded-2xl glass shadow-sm border border-border sticky top-4 z-50">
+        <header className="h-20 flex items-center justify-between px-8 m-4 rounded-2xl bg-surface shadow-md border border-border sticky top-4 z-50">
           <div className="text-sm font-medium text-text-muted uppercase tracking-wider">
             {location.pathname.replace('/', '').replace('-', ' ')}
           </div>

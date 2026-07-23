@@ -44,8 +44,8 @@ export function Analytics() {
         body: JSON.stringify({ 
           name: newExp.name, 
           variants: [
-            { name: 'Variant A', trafficWeight: 50, landingPageId: (newExp as any).variantAPage },
-            { name: 'Variant B', trafficWeight: 50, landingPageId: (newExp as any).variantBPage }
+            { name: 'Variant A', landingPageId: (newExp as any).variantAPage, trafficWeight: 50 },
+            { name: 'Variant B', landingPageId: (newExp as any).variantBPage, trafficWeight: 50 }
           ]
         }),
       });
