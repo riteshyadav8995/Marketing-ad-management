@@ -31,7 +31,7 @@ export function PagesBuilder() {
       queryClient.invalidateQueries({ queryKey: ['pages'] });
       setTitle('New Campaign Page');
       setSections([]);
-      alert(`Page published successfully! Live URL: http://localhost:5173/p/${data.slug}`);
+      alert(`Page published successfully! Live URL: ${window.location.origin}/p/${data.slug}`);
     }
   });
 

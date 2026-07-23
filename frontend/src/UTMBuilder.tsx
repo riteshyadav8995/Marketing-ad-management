@@ -115,7 +115,7 @@ export function UTMBuilder() {
                     <Select onValueChange={(val) => {
                       const selectedPage = pages?.find((p: any) => p.id === val);
                       if (selectedPage) {
-                        form.setValue('destinationUrl', `http://localhost:5173/p/${selectedPage.slug}`);
+                        form.setValue('destinationUrl', `${window.location.origin}/p/${selectedPage.slug}`);
                       }
                     }}>
                       <SelectTrigger className="bg-surface/50 border-border text-text">
@@ -136,7 +136,7 @@ export function UTMBuilder() {
                       <FormItem>
                         <FormLabel className="text-text">Destination URL <span className="text-accent">*</span></FormLabel>
                         <FormControl>
-                          <Input className="bg-surface/50 border-border text-text focus:ring-primary/50 transition-all" placeholder="http://localhost:5173/p/your-campaign" {...field} />
+                          <Input className="bg-surface/50 border-border text-text focus:ring-primary/50 transition-all" placeholder={`${window.location.origin}/p/your-campaign`} {...field} />
                         </FormControl>
                         <FormMessage className="text-accent" />
                       </FormItem>
