@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Contact2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Contact2, Download } from 'lucide-react';
 
 async function fetchLeads() {
   const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/leads`);
@@ -31,6 +32,11 @@ export function CRM() {
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [revenueInput, setRevenueInput] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  // Filters State
+  const [platformFilter, setPlatformFilter] = useState('All');
+  const [mediumFilter, setMediumFilter] = useState('All');
+  const [campaignFilter, setCampaignFilter] = useState('All');
 
   const mutation = useMutation({
     mutationFn: updateLeadStatus,
@@ -45,6 +51,60 @@ export function CRM() {
     if (selectedLead) {
       mutation.mutate({ id: selectedLead.id, status: 'ENROLLED', revenue: revenueInput });
     }
+  };
+
+  const { filteredLeads, uniqueCampaigns } = useMemo(() => {
+    if (!leads) return { filteredLeads: [], uniqueCampaigns: [] };
+    
+    const campaigns = new Set<string>();
+    
+    const filtered = leads.filter((lead: any) => {
+      const sub = lead.submissions?.[0] || {};
+      const platform = (lead.source || 'Direct').toLowerCase();
+      const medium = (sub.utmMedium || '').toLowerCase();
+      const campaign = sub.utmCampaign || '';
+      
+      if (campaign) campaigns.add(campaign);
+      
+      const matchPlatform = platformFilter === 'All' || platform.includes(platformFilter.toLowerCase());
+      const matchMedium = mediumFilter === 'All' || medium.includes(mediumFilter.toLowerCase());
+      const matchCampaign = campaignFilter === 'All' || campaign === campaignFilter;
+      
+      return matchPlatform && matchMedium && matchCampaign;
+    });
+
+    return { filteredLeads: filtered, uniqueCampaigns: Array.from(campaigns) };
+  }, [leads, platformFilter, mediumFilter, campaignFilter]);
+
+  const exportToCSV = () => {
+    if (!filteredLeads || filteredLeads.length === 0) return;
+    
+    const headers = ['Name', 'Email', 'Platform', 'Medium', 'Campaign', 'Status', 'Revenue'];
+    const rows = filteredLeads.map((lead: any) => {
+      const platform = lead.source || 'Direct';
+      const sub = lead.submissions?.[0] || {};
+      const medium = sub.utmMedium || '';
+      const campaign = sub.utmCampaign || '';
+      
+      return [
+        `"${lead.name}"`,
+        `"${lead.email}"`,
+        `"${platform}"`,
+        `"${medium}"`,
+        `"${campaign}"`,
+        `"${lead.status}"`,
+        `"${lead.revenue || 0}"`
+      ].join(',');
+    });
+    
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "leads_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (isLoading) {
@@ -67,10 +127,54 @@ export function CRM() {
             <span>Lead Pipeline</span>
           </CardTitle>
           <CardDescription className="text-text-muted">
-            All leads captured from your landing pages and forms.
+            All leads captured from your landing pages and forms. Filter and export your audience below.
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-wrap items-center gap-4 mb-6">
+            <Select value={platformFilter} onValueChange={setPlatformFilter}>
+              <SelectTrigger className="w-[180px] bg-surface/50 border-border text-text">
+                <SelectValue placeholder="Platform" />
+              </SelectTrigger>
+              <SelectContent className="bg-surface border-border text-text">
+                <SelectItem value="All">All Platforms</SelectItem>
+                <SelectItem value="google">Google</SelectItem>
+                <SelectItem value="facebook">Facebook</SelectItem>
+                <SelectItem value="instagram">Instagram</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={mediumFilter} onValueChange={setMediumFilter}>
+              <SelectTrigger className="w-[180px] bg-surface/50 border-border text-text">
+                <SelectValue placeholder="Medium" />
+              </SelectTrigger>
+              <SelectContent className="bg-surface border-border text-text">
+                <SelectItem value="All">All Mediums</SelectItem>
+                <SelectItem value="organic">Organic</SelectItem>
+                <SelectItem value="paid_social">Paid Social</SelectItem>
+                <SelectItem value="paid_search">Paid Search</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={campaignFilter} onValueChange={setCampaignFilter}>
+              <SelectTrigger className="w-[200px] bg-surface/50 border-border text-text">
+                <SelectValue placeholder="Campaign" />
+              </SelectTrigger>
+              <SelectContent className="bg-surface border-border text-text">
+                <SelectItem value="All">All Campaigns</SelectItem>
+                {uniqueCampaigns.map(c => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="flex-1"></div>
+            
+            <Button onClick={exportToCSV} variant="outline" className="border-border text-text bg-surface hover:bg-surface-hover">
+              <Download className="mr-2 h-4 w-4" /> Export CSV
+            </Button>
+          </div>
+
           <div className="rounded-md border border-border">
             <Table>
               <TableHeader className="bg-surface-hover/50">
@@ -84,13 +188,16 @@ export function CRM() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {leads?.map((lead: any) => (
+                {filteredLeads?.map((lead: any) => (
                   <TableRow key={lead.id} className="border-border hover:bg-surface-hover/30 transition-colors">
                     <TableCell className="font-medium text-text">{lead.name}</TableCell>
                     <TableCell className="text-text-muted">{lead.email}</TableCell>
                     <TableCell className="text-text-muted">
                       <div className="flex flex-col space-y-1">
-                        <span className="text-xs uppercase tracking-wider font-semibold text-primary">{lead.source || 'Direct'}</span>
+                        <span className="text-xs uppercase tracking-wider font-semibold text-primary">
+                          {lead.source || 'Direct'}
+                          {lead.submissions?.[0]?.utmMedium && ` (${lead.submissions[0].utmMedium})`}
+                        </span>
                         {lead.submissions?.[0]?.utmCampaign && (
                           <span className="text-xs text-text-muted opacity-75">{lead.submissions[0].utmCampaign}</span>
                         )}
@@ -148,10 +255,10 @@ export function CRM() {
                     </TableCell>
                   </TableRow>
                 ))}
-                {leads?.length === 0 && (
+                {filteredLeads?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center text-text-muted">
-                      No leads found. Start generating traffic!
+                      No leads found matching these filters.
                     </TableCell>
                   </TableRow>
                 )}

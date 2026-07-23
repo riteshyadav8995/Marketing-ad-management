@@ -55,6 +55,10 @@ export function Analytics() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['experiments'] });
       setNewExp({ name: '', hypothesis: '', metric: 'leads' });
+      alert("Experiment created successfully!");
+    },
+    onError: (err: any) => {
+      alert(`Error creating experiment: ${err.message || 'Unknown error'}`);
     }
   });
 
