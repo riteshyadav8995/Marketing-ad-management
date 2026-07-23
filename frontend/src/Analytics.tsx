@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { PieChart, FlaskConical, Target, ActivitySquare } from 'lucide-react';
+import { PieChart, FlaskConical, Target, ActivitySquare, Eye } from 'lucide-react';
 
 export function Analytics() {
   const queryClient = useQueryClient();
@@ -196,7 +197,7 @@ export function Analytics() {
 
           <Card className="glass border-none shadow-xl">
             <CardHeader className="border-b border-border/50 pb-6">
-              <CardTitle className="text-text">Active Experiments</CardTitle>
+              <CardTitle className="text-text">Experiment History</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               {loadingExp ? (
@@ -204,46 +205,97 @@ export function Analytics() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {experiments?.map((exp: any) => (
-                    <div key={exp.id} className="p-5 border border-border bg-surface/30 rounded-xl hover:border-accent/30 transition-colors shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-bold text-text text-lg">{exp.name}</h4>
-                        <span className="text-xs font-semibold tracking-wider uppercase bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full border border-emerald-500/20">{exp.status}</span>
-                      </div>
-                      <p className="text-sm text-text-muted mb-4 bg-surface p-3 rounded-lg border border-border/50 font-medium italic">"{exp.hypothesis}"</p>
-                      
-                      <div className="rounded-lg overflow-hidden border border-border bg-surface">
-                        <Table>
-                          <TableHeader className="bg-surface-hover/50">
-                            <TableRow className="border-border">
-                              <TableHead className="text-text-muted">Variant</TableHead>
-                              <TableHead className="text-right text-text-muted">Visits</TableHead>
-                              <TableHead className="text-right text-text-muted">Conversions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {exp.variants?.map((v: any, i: number) => (
-                              <TableRow key={i} className="border-border hover:bg-surface-hover/30">
-                                <TableCell className="font-medium text-text flex items-center space-x-2">
-                                  <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-primary' : 'bg-accent'}`} />
-                                  <span>{v.name}</span>
-                                </TableCell>
-                                <TableCell className="text-right text-text">{v._count?.visits?.toLocaleString() || '0'}</TableCell>
-                                <TableCell className="text-right text-text font-bold">{v._count?.leads?.toLocaleString() || '0'}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  ))}
-                  {experiments?.length === 0 && (
-                    <div className="text-center py-8 bg-surface/30 rounded-xl border border-border border-dashed">
-                      <FlaskConical size={32} className="mx-auto text-text-muted mb-3 opacity-50" />
-                      <p className="text-sm font-medium text-text-muted">No active experiments running.</p>
-                    </div>
-                  )}
+                <div className="rounded-md border border-border">
+                  <Table>
+                    <TableHeader className="bg-surface-hover/50">
+                      <TableRow className="border-border">
+                        <TableHead className="text-text-muted">Name</TableHead>
+                        <TableHead className="text-text-muted">Status</TableHead>
+                        <TableHead className="text-text-muted">Created Date</TableHead>
+                        <TableHead className="text-right text-text-muted">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {experiments?.map((exp: any) => (
+                        <TableRow key={exp.id} className="border-border hover:bg-surface-hover/30 transition-colors">
+                          <TableCell className="font-medium text-text">{exp.name}</TableCell>
+                          <TableCell>
+                            <span className="text-xs font-semibold tracking-wider uppercase bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full border border-emerald-500/20">
+                              {exp.status}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-text-muted">
+                            {new Date(exp.createdAt).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="border-border text-text hover:bg-surface-hover">
+                                  <Eye className="mr-2 h-4 w-4" /> See Details
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="glass border-border max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle className="text-text text-xl">{exp.name} - Details</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-6 py-4">
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-text-muted mb-2 uppercase tracking-wider">Hypothesis</h4>
+                                    <p className="text-sm text-text bg-surface p-4 rounded-lg border border-border/50 font-medium italic">
+                                      "{exp.hypothesis || 'No hypothesis provided'}"
+                                    </p>
+                                  </div>
+                                  
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-text-muted mb-3 uppercase tracking-wider">Variant Performance</h4>
+                                    <div className="rounded-lg overflow-hidden border border-border bg-surface">
+                                      <Table>
+                                        <TableHeader className="bg-surface-hover/50">
+                                          <TableRow className="border-border">
+                                            <TableHead className="text-text-muted">Variant</TableHead>
+                                            <TableHead className="text-right text-text-muted">Visits</TableHead>
+                                            <TableHead className="text-right text-text-muted">Conversions</TableHead>
+                                            <TableHead className="text-right text-text-muted">Conv. Rate</TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {exp.variants?.map((v: any, i: number) => {
+                                            const visits = v._count?.visits || 0;
+                                            const leads = v._count?.leads || 0;
+                                            const cvr = visits > 0 ? ((leads / visits) * 100).toFixed(1) + '%' : '0%';
+                                            
+                                            return (
+                                              <TableRow key={i} className="border-border hover:bg-surface-hover/30">
+                                                <TableCell className="font-medium text-text flex items-center space-x-2">
+                                                  <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-primary' : 'bg-accent'}`} />
+                                                  <span>{v.name}</span>
+                                                </TableCell>
+                                                <TableCell className="text-right text-text">{visits.toLocaleString()}</TableCell>
+                                                <TableCell className="text-right text-text font-bold">{leads.toLocaleString()}</TableCell>
+                                                <TableCell className="text-right text-emerald-400 font-semibold">{cvr}</TableCell>
+                                              </TableRow>
+                                            );
+                                          })}
+                                        </TableBody>
+                                      </Table>
+                                    </div>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {experiments?.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-8">
+                            <FlaskConical size={32} className="mx-auto text-text-muted mb-3 opacity-50" />
+                            <p className="text-sm font-medium text-text-muted">No active experiments running.</p>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
               )}
             </CardContent>
