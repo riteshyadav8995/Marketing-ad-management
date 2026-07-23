@@ -1,0 +1,203 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  users             User[]
+  adAccounts        AdAccount[]
+  campaigns         MarketingCampaign[]
+  dailyMetrics      DailyMetric[]
+  leads             Lead[]
+  landingPages      LandingPage[]
+  experiments       ABExperiment[]
+}
+
+model User {
+  id             String       @id @default(uuid())
+  email          String       @unique
+  passwordHash   String
+  role           String       @default("VIEWER") // OWNER, MARKETING_MANAGER, EXECUTIVE, SALES, VIEWER
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model AdPlatformConnection {
+  id                String    @id @default(uuid())
+  platform          String    // GOOGLE, META
+  externalAccountId String
+  encryptedTokens   String
+  expiry            DateTime?
+  status            String    // CONNECTED, DISCONNECTED, ERROR
+  lastSync          DateTime?
+  adAccounts        AdAccount[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model AdAccount {
+  id             String               @id @default(uuid())
+  organizationId String
+  connectionId   String
+  platform       String
+  accountId      String
+  name           String
+  currency       String
+  timezone       String
+  
+  organization   Organization         @relation(fields: [organizationId], references: [id])
+  connection     AdPlatformConnection @relation(fields: [connectionId], references: [id])
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model MarketingCampaign {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  objective      String?
+  ownerId        String?
+  budget         Float?
+  startDate      DateTime?
+  endDate        DateTime?
+  status         String       @default("DRAFT") // DRAFT, ACTIVE, PAUSED, COMPLETED
+  
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  utmLinks       UTMLink[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model UTMLink {
+  id             String            @id @default(uuid())
+  campaignId     String
+  source         String
+  medium         String
+  campaignName   String
+  content        String?
+  term           String?
+  finalUrl       String
+  shortCode      String?           @unique
+  
+  campaign       MarketingCampaign @relation(fields: [campaignId], references: [id])
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model DailyMetric {
+  id             String            @id @default(uuid())
+  platform       String            // GOOGLE, META
+  accountId      String            // ID from the platform
+  date           DateTime
+  spend          Float             @default(0)
+  impressions    Int               @default(0)
+  clicks         Int               @default(0)
+  leads          Int               @default(0)
+  conversions    Int               @default(0)
+  revenue        Float             @default(0)
+  
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@unique([platform, accountId, date])
+}
+
+model Lead {
+  id             String            @id @default(uuid())
+  organizationId String
+  name           String
+  email          String
+  phone          String?
+  status         String            @default("NEW") // NEW, CONTACTED, ENROLLED
+  revenue        Float             @default(0)
+  source         String?
+  campaignId     String?
+  variantId      String?
+  
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  variant        ExperimentVariant? @relation(fields: [variantId], references: [id])
+  submissions    FormSubmission[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model FormSubmission {
+  id             String            @id @default(uuid())
+  leadId         String
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  
+  lead           Lead              @relation(fields: [leadId], references: [id])
+  createdAt      DateTime          @default(now())
+}
+
+model LandingPage {
+  id             String         @id @default(uuid())
+  organizationId String
+  title          String
+  slug           String         @unique
+  sections       Json
+  status         String         @default("PUBLISHED")
+  
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  visits         PageVisit[]
+  variants       ExperimentVariant[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model PageVisit {
+  id             String       @id @default(uuid())
+  landingPageId  String
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  utmContent     String?
+  variantId      String?
+  visitedAt      DateTime     @default(now())
+  
+  landingPage    LandingPage  @relation(fields: [landingPageId], references: [id])
+  variant        ExperimentVariant? @relation(fields: [variantId], references: [id])
+}
+
+model ABExperiment {
+  id             String         @id @default(uuid())
+  organizationId String
+  name           String
+  status         String         @default("DRAFT") // DRAFT, RUNNING, PAUSED, ENDED
+  startDate      DateTime?
+  endDate        DateTime?
+  
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  variants       ExperimentVariant[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model ExperimentVariant {
+  id             String         @id @default(uuid())
+  experimentId   String
+  name           String         // e.g. 'Variant A', 'Variant B'
+  trafficWeight  Int            @default(50)
+  landingPageId  String?
+  
+  experiment     ABExperiment   @relation(fields: [experimentId], references: [id])
+  landingPage    LandingPage?   @relation(fields: [landingPageId], references: [id])
+  visits         PageVisit[]
+  leads          Lead[]
+}
