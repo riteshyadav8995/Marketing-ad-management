@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Contact2, TrendingUp } from 'lucide-react';
+import { Contact2 } from 'lucide-react';
 
 async function fetchLeads() {
   const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/leads`);
